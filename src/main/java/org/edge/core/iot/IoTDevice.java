@@ -1,16 +1,9 @@
 package org.edge.core.iot;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.SimEntity;
 import org.cloudbus.cloudsim.core.SimEvent;
-import org.edge.core.feature.Battery;
-import org.edge.core.feature.EdgeLet;
-import org.edge.core.feature.EdgeState;
-import org.edge.core.feature.IoTType;
-import org.edge.core.feature.Mobility;
+import org.edge.core.feature.*;
 import org.edge.core.feature.policy.MovingPolicy;
 import org.edge.core.feature.policy.NetworkDelayCalculationPolicy;
 import org.edge.core.feature.policy.SimpleMovingPolicy;
@@ -19,7 +12,12 @@ import org.edge.entity.ConnectionHeader.Direction;
 import org.edge.entity.DevicesInfo;
 import org.edge.exception.NullConnectionException;
 import org.edge.network.NetworkModel;
+import org.edge.project.Configuration;
 import org.edge.utils.LogUtil;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * can LoT devices store sensed data if the data cannot be sent at a time? can
@@ -128,6 +126,9 @@ public abstract class IoTDevice extends SimEntity {
 	private long capacityToStore = 0;
 	private NetworkModel networkModel;
 	private EdgeLet dataTemplate;
+
+	private double lastEventProcessingTime = 0;
+	private Optional<Configuration> photovoltaicConfiguration = Optional.empty();
 
 	public IoTDevice(IoTType type, String name, double data_frequency, double dataGenerationTime,
 			int complexityOfDataPackage, int dataSize, NetworkModel networkModel, double max_battery_capacity,
@@ -367,6 +368,16 @@ public abstract class IoTDevice extends SimEntity {
 
 	@Override
 	public void processEvent(SimEvent ev) {
+		// bateria
+		double now = CloudSim.clock();
+		double dt = now - lastEventProcessingTime;
+		lastEventProcessingTime = now;
+		photovoltaicConfiguration.ifPresent(conf -> {
+			double currentPower = conf.getPower(now);
+			double newCapacity = Math.min(battery.getCurrentCapacity() + currentPower * dt, battery.getMaxCapacity());
+			battery.setCurrentCapacity(newCapacity);
+		});
+
 		int tag = ev.getTag();
 		switch (tag) {
 
@@ -558,4 +569,7 @@ public abstract class IoTDevice extends SimEntity {
 
 	}
 
+	public void setPhotovoltaicConfiguration(Configuration photovoltaicConfiguration) {
+		this.photovoltaicConfiguration = Optional.of(photovoltaicConfiguration);
+	}
 }

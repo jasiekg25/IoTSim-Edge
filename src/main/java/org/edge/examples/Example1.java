@@ -20,6 +20,7 @@ import org.edge.entity.MicroElementTopologyEntity;
 import org.edge.exception.MicroElementNotFoundException;
 import org.edge.network.NetworkModel;
 import org.edge.network.NetworkType;
+import org.edge.project.BatteryLogger;
 import org.edge.project.data_models.Solar;
 import org.edge.protocol.*;
 import org.edge.utils.Configuration;
@@ -43,7 +44,6 @@ import java.util.List;
  */
 @Configuration("configuration.json")
 public class Example1 {
-
     private static void printCloudletList(List<Cloudlet> list, List<MicroELement> melList, List<EdgeDataCenter> datacenters) {
         int size = list.size();
         Cloudlet edgeLet;
@@ -106,8 +106,10 @@ public class Example1 {
     public void initFromConfiguation(ConfiguationEntity conf) {
         this.initCloudSim(conf);
 
+        BatteryLogger batteryLogger = new BatteryLogger("battery-results.csv");
+
         EdgeDataCenterBroker broker = this.createBroker(conf);
-        List<IoTDevice> edgeDevices = this.createIoTDevice(conf);
+        List<IoTDevice> edgeDevices = this.createIoTDevice(conf, batteryLogger);
 
         List<EdgeDataCenter> datacenters = this.createDataCenter(conf);
         List<MicroELement> melList = this.createMEL(conf, broker);
@@ -130,6 +132,7 @@ public class Example1 {
 
         printCloudletList(cloudletReceivedList, melList, datacenters);
         LogUtil.simulationFinished();
+        batteryLogger.write();
 
 
     }
@@ -308,14 +311,15 @@ public class Example1 {
      * create Iot Device from configuration
      *
      * @param conf
+     * @param batteryLogger
      * @return
      */
-    private List<IoTDevice> createIoTDevice(ConfiguationEntity conf) {
+    private List<IoTDevice> createIoTDevice(ConfiguationEntity conf, BatteryLogger batteryLogger) {
         String indent = "    ";
         List<IotDeviceEntity> ioTDeviceEntities = conf.getIoTDeviceEntities();
         List<IoTDevice> devices = new ArrayList<>();
         for (IotDeviceEntity iotDeviceEntity : ioTDeviceEntities) {
-            List<IoTDevice> createIoTDevice = this.createIoTDevice(iotDeviceEntity);
+            List<IoTDevice> createIoTDevice = this.createIoTDevice(iotDeviceEntity, batteryLogger);
             if (createIoTDevice.size() == 0)
                 return null;
             devices.addAll(createIoTDevice);
@@ -561,7 +565,7 @@ public class Example1 {
         return peList;
     }
 
-    private List<IoTDevice> createIoTDevice(IotDeviceEntity iotDeviceEntity) {
+    private List<IoTDevice> createIoTDevice(IotDeviceEntity iotDeviceEntity, BatteryLogger batteryLogger) {
         List<IoTDevice> devices = new ArrayList<>();
         String ioTClassName = iotDeviceEntity.ioTClassName;
         NetworkModelEntity networkModelEntity = iotDeviceEntity.getNetworkModelEntity();
@@ -586,6 +590,10 @@ public class Example1 {
                 IoTDevice newInstance = (IoTDevice) constructor.newInstance(networkModel);
                 newInstance.setAssigmentIoTId(iotDeviceEntity.getAssignmentId());
 
+                if (i == 10) {
+                    // batteryLogger
+                    newInstance.setBatteryLogger(batteryLogger);
+                }
                 newInstance.setPhotovoltaicConfiguration(photovoltaicConfiguration);
                 newInstance.setBatteryDrainageRate(iotDeviceEntity.getBattery_drainage_rate());
                 newInstance.getBattery().setMaxCapacity(iotDeviceEntity.getMax_battery_capacity());

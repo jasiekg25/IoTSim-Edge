@@ -12,6 +12,7 @@ import org.edge.entity.ConnectionHeader.Direction;
 import org.edge.entity.DevicesInfo;
 import org.edge.exception.NullConnectionException;
 import org.edge.network.NetworkModel;
+import org.edge.project.BatteryLogger;
 import org.edge.project.Configuration;
 import org.edge.utils.LogUtil;
 
@@ -129,6 +130,7 @@ public abstract class IoTDevice extends SimEntity {
 
 	private double lastEventProcessingTime = 0;
 	private Optional<Configuration> photovoltaicConfiguration = Optional.empty();
+	private Optional<BatteryLogger> batteryLogger = Optional.empty();
 
 	public IoTDevice(IoTType type, String name, double data_frequency, double dataGenerationTime,
 			int complexityOfDataPackage, int dataSize, NetworkModel networkModel, double max_battery_capacity,
@@ -369,7 +371,7 @@ public abstract class IoTDevice extends SimEntity {
 	@Override
 	public void processEvent(SimEvent ev) {
 		// bateria
-		double now = CloudSim.clock();
+		double now = CloudSim.clock(); // minuty
 		double dt = now - lastEventProcessingTime;
 		lastEventProcessingTime = now;
 		photovoltaicConfiguration.ifPresent(conf -> {
@@ -377,6 +379,7 @@ public abstract class IoTDevice extends SimEntity {
 			double newCapacity = Math.min(battery.getCurrentCapacity() + currentPower * dt, battery.getMaxCapacity());
 			battery.setCurrentCapacity(newCapacity);
 		});
+		batteryLogger.ifPresent(logger -> logger.log(now, battery.getCurrentCapacity()));
 
 		int tag = ev.getTag();
 		switch (tag) {
@@ -571,5 +574,9 @@ public abstract class IoTDevice extends SimEntity {
 
 	public void setPhotovoltaicConfiguration(Configuration photovoltaicConfiguration) {
 		this.photovoltaicConfiguration = Optional.of(photovoltaicConfiguration);
+	}
+
+	public void setBatteryLogger(BatteryLogger batteryLogger) {
+		this.batteryLogger = Optional.of(batteryLogger);
 	}
 }

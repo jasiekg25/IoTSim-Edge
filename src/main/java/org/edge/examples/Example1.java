@@ -574,8 +574,8 @@ public class Example1 {
 
         try {
             // battery
-            Solar solar = new Solar(50, 20, 0.03, 14);
-            LocalDateTime startTime = LocalDateTime.of(2010, 1, 1, 12, 0, 0);
+            Solar solar = new Solar(50, 20, 0.0019, 14);
+            LocalDateTime startTime = LocalDateTime.of(2010, 3, 21, 3, 0, 0);
             org.edge.project.Configuration photovoltaicConfiguration = new org.edge.project.Configuration(solar, startTime, 10000);
 
             Class<?> clazz = Class.forName(ioTClassName);

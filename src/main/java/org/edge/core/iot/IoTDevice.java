@@ -371,15 +371,18 @@ public abstract class IoTDevice extends SimEntity {
 	@Override
 	public void processEvent(SimEvent ev) {
 		// bateria
-		double now = CloudSim.clock(); // minuty
+		double now = CloudSim.clock(); // minuty * 2
 		double dt = now - lastEventProcessingTime;
 		lastEventProcessingTime = now;
 		photovoltaicConfiguration.ifPresent(conf -> {
 			double currentPower = conf.getPower(now);
-			double newCapacity = Math.min(battery.getCurrentCapacity() + currentPower * dt, battery.getMaxCapacity());
+			double newCapacity = Math.min(battery.getCurrentCapacity() + currentPower * dt , battery.getMaxCapacity());
 			battery.setCurrentCapacity(newCapacity);
 		});
-		batteryLogger.ifPresent(logger -> logger.log(now, battery.getCurrentCapacity()));
+		batteryLogger.ifPresent(logger -> {
+			double currentCapacity = battery.getCurrentCapacity();
+			logger.log(now, currentCapacity);
+		});
 
 		int tag = ev.getTag();
 		switch (tag) {

@@ -9,6 +9,7 @@ import java.util.List;
 public class BatteryLogger {
     private String filename;
     private List<Measurement> measurements = new ArrayList<>();
+    private boolean hasBeenWritten = false;
 
     public BatteryLogger(String filename) {
         this.filename = filename;
@@ -19,6 +20,7 @@ public class BatteryLogger {
     }
 
     public void write() {
+        if (hasBeenWritten) return;
         try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
             for (Measurement measure : measurements) {
                 writer.printf("%f\t%f\n", measure.time, measure.value);
@@ -27,6 +29,7 @@ public class BatteryLogger {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
+        hasBeenWritten = true;
     }
 
     private static class Measurement {

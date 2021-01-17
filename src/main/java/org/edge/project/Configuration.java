@@ -13,7 +13,7 @@ public class Configuration {
     private LocalDateTime endDate;
 
     private HourlyPowerData hourlyPowerData;
-    private static int TICKS_IN_HOUR = 60;
+    private static int TICKS_IN_HOUR = 30;
 
     public Configuration(Solar solar, LocalDateTime startDate, int simulationTime) throws IOException {
         this.solar = solar;

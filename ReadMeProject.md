@@ -104,5 +104,36 @@ batteryLogger.ifPresent(logger -> {
 #### Running Simulation
 
 We have modified the existing `Example1.java` to use our changes.
+We are passing `Configuration` to all `TemperatureSensor` devices.
+We are additionally passing `BatteryLogger` to one instance of `TemperatureSensor`.
+We have chosen the location of Kraków, and set the start date to 2010-03-21 03:00.
+The CSV containing logged battery charge will be saved to `battery-results.csv`.
 
+```java
+BatteryLogger batteryLogger = new BatteryLogger("battery-results.csv");
+
+// [...]
+
+Solar solar = new Solar(50, 20, 0.0019, 14);
+LocalDateTime startTime = LocalDateTime.of(2010, 3, 21, 3, 0, 0);
+org.edge.project.Configuration photovoltaicConfiguration = new org.edge.project.Configuration(solar, startTime, 10000);
+
+// [...]
+
+for (int i = 0; i < numberofEntity; i++) {
+    // [...]
+    if (i == 10) {
+        // batteryLogger
+        newInstance.setBatteryLogger(batteryLogger);
+    }
+    newInstance.setPhotovoltaicConfiguration(photovoltaicConfiguration);
+    // [...]
+}
+```
 #### Example of Simulation's results
+
+##### Plot of battery charge without the use photovoltaic battery
+![with](./src/readMeResources/withoutSolar.png) 
+
+##### Plot of battery charge when using photovoltaic battery
+![without](./src/readMeResources/withSolar.png) 

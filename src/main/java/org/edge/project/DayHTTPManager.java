@@ -14,8 +14,11 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 
@@ -24,6 +27,8 @@ public class DayHTTPManager {
     public DayHTTPManager() {}
 
     private static String buildUrl(String lat, String lon, double peakPower, double loss, LocalDateTime startDate, LocalDateTime endDate) {
+        DecimalFormat df = new DecimalFormat("0", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
+        df.setMaximumFractionDigits(10);
         StringBuilder strBuilder = new StringBuilder("https://re.jrc.ec.europa.eu/api/seriescalc?")
                 .append("lat=")
                 .append(lat)
@@ -34,7 +39,7 @@ public class DayHTTPManager {
                 .append("&endyear=")
                 .append(endDate.getYear())
                 .append("&peakpower=")
-                .append(peakPower)
+                .append(df.format(peakPower))
                 .append("&loss=")
                 .append(loss)
                 .append("&pvcalculation=1&pvtechchoice=crystSi&optimalangles=1&outputformat=json");

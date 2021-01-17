@@ -28,8 +28,8 @@
 				"networkType": "bluetooth",
 				"communicationProtocol": "xmpp"
 			},
-			"max_battery_capacity": 100.0,
-			"battery_drainage_rate": 2.0,
+			"max_battery_capacity": 250.0,
+			"battery_drainage_rate": 1.0,
 			"processingAbility": 1.0,
 			"numberofEntity": 50
 		}

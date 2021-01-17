@@ -71,5 +71,38 @@ public class DayHTTPManager {
 
 #### Running Simulation
 
+#### IoTDevice
+
+We have added two additional fields to `IoTDevice` class.
+One of them is an instance of `Configuration` class that is used to fetch current power gathered by the 
+solar panels. The other one is an instance of `BatteryLogger` class that logs battery charge
+throughout the simulation and saves it inside CSV file.
+
+```java
+private Optional<Configuration> photovoltaicConfiguration = Optional.empty();
+private Optional<BatteryLogger> batteryLogger = Optional.empty();
+```
+
+The state gets updated inside the `processEvent` method. We multiply current power of solar panels configuration
+and multiply it by the time elapsed since last event (Euler method).
+
+```java
+double now = CloudSim.clock(); 
+double dt = now - lastEventProcessingTime;
+lastEventProcessingTime = now;
+photovoltaicConfiguration.ifPresent(conf -> {
+    double currentPower = conf.getPower(now);
+    double newCapacity = Math.min(battery.getCurrentCapacity() + currentPower * dt , battery.getMaxCapacity());
+    battery.setCurrentCapacity(newCapacity);
+});
+batteryLogger.ifPresent(logger -> {
+    double currentCapacity = battery.getCurrentCapacity();
+    logger.log(now, currentCapacity);
+});
+```
+
+#### Running Simulation
+
+We have modified the existing `Example1.java` to use our changes.
 
 #### Example of Simulation's results

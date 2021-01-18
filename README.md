@@ -142,7 +142,7 @@ for (int i = 0; i < numberofEntity; i++) {
 
 ---
 
-#ReadMe from the original [IoT-Sim-Edge Simulator](https://github.com/DNJha/IoTSim-Edge "IoT-Sim-Edge Simulator Homepage") 
+# ReadMe from the original [IoT-Sim-Edge Simulator](https://github.com/DNJha/IoTSim-Edge "IoT-Sim-Edge Simulator Homepage") 
 (version before our extension)
 
 ### IoTSIM
